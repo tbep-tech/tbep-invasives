@@ -1,0 +1,315 @@
+/* Rubik */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&display=swap');
+
+/* DIN condensed approximate */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+/* Whole document: */
+
+body{
+  font-family: 'Roboto';
+  font-weight: 400;
+  font-size: 18px;
+  color: #636363;
+}
+
+/* header styles */
+
+h1,h2,h3,h4,h5 {
+  font-weight: 500;
+  color: #005293;
+  font-family: 'Rubik',Helvetica,Arial,Lucida,sans-serif;
+}
+h1 {
+	font-size:40px;
+}
+h2 {
+	font-size:32px;
+}
+h3 {
+	font-size:24px;
+}
+h4 {
+	font-size:18px;
+}
+h5 {
+	font-size:16px;
+}
+h6 {
+	font-size:14px;
+}
+
+/* top navbar styles */
+
+.navbar {
+  border-color: black;
+  font-family: 'Roboto'; /* main tab fonts */
+  font-weight: 300;
+}
+
+.dropdown-menu>.active>a, .dropdown-menu>.active>a:hover, .dropdown-menu>.active>a:focus {
+    color: #ffffff;
+    text-decoration: none;
+    outline: 0;
+    background-color: #00806E;
+}
+
+.navbar-brand { /* dashboard title */
+  font-weight: bold;
+  color: #005293;
+}
+
+.navbar-nav li a:hover, .navbar-nav > .active > a {
+  color: #fff !important;
+  background-color:#5c4a42!important;
+  background-image: none !important;
+}
+
+/* sidebar */
+
+.sidebar {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+.section.sidebar {
+  background-color: #95898430; /* gray with alpha */
+}
+
+/* sub sections */
+
+.level3 {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+.chart-title {
+  font-family: 'Roboto';
+  font-weight: 300;
+  font-style: italic;
+  color: #958984;
+}
+
+.nav-tabs {
+  font-family: 'Roboto';
+  font-weight: 300;
+  font-style: italic;
+  color: #958984;
+}
+
+.control-label {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+.shiny-text-output {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+.material-switch {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+/* shiny slider stuff */
+
+.irs-line {
+  background: #E5E5E5 !important;
+  border: 1px #E5E5E5 !important;
+}
+
+.irs-handle {
+  background: #00806E !important;
+}
+
+.irs-single, .irs-from, .irs-to {
+  background: #00806E!important; 
+}
+
+.irs-bar-edge, .irs-bar{
+  background: #E5E5E5 !important; 
+  border: 1px #E5E5E5 !important;
+}
+
+.js-irs-6 .irs-bar-edge, .js-irs-6 .irs-bar {
+  background: #00806E!important; 
+  border: 1px #00806E !important;
+}
+
+/* background color of selected option for shiny selectInput */
+
+.selectize-dropdown .option.selected {
+  background: #00806E !important;
+}
+
+/* tabset top border */
+
+.nav-tabs-custom > .nav-tabs > li.active {
+  border-top-color: #00806E;
+}
+
+/* bar chart formatting for reactable */
+.bar-cell {
+  display: flex;
+  align-items: center;
+}
+.number {
+  font-family: "Fira Mono", Consolas, Monaco, monospace;
+  font-size: 13.5px;
+  white-space: pre;
+}
+.bar-chart {
+  flex-grow: 1;
+  margin-left: 6px;
+  height: 14px;
+}
+.bar {
+  height: 100%;
+}
+
+/* leaflet */
+
+.leaflet-control { /* leaflet legends, control boxes */
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+}
+
+/* removes all but one trace from the rangeslider */
+.rangeslider-rangeplot .overplot{
+    display:none;
+}
+
+/* figure captions */
+
+.caption {
+  font-family: 'Roboto';
+  font-weight: 300;
+  color: #958984;
+  font-style: italic;
+}
+
+/* change link colors to match wordpress */
+a {
+    color: #db5b25;
+    font-family: 'Roboto',Helvetica,Arial,Lucida,sans-serif;
+    font-weight: 500;
+	text-decoration:none;
+}
+
+a:visited {
+  color: #db5b25;
+}
+
+a:hover {
+  color: #f57d05;
+}
+
+/* tabset pills */
+.nav-pills>li>a {
+    border-radius: 4px;
+    color: #ffffff!important;
+    font-size: 16px;
+    font-family: 'Rubik',Helvetica,Arial,Lucida,sans-serif!important;
+    background-color: #F0AD4E;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 500;
+}
+.nav-pills>li>a:hover, .nav-pills>li>a:focus, .nav-pills>li.active>a,     .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
+     background-color: #ea6f17;
+     }
+     
+/* from Shiny assistant */
+.fill-height {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  padding: 1rem;  /* Add padding to fill-height */
+}
+.resizable-row {
+  display: flex;
+  gap: 1rem;  /* Increased gap to match card spacing */
+  flex: 1;
+  min-height: 0;
+  padding: 0;  /* Remove padding from resizable-row */
+}
+.resizable-column {
+  resize: horizontal;
+  overflow: hidden;
+  min-width: 200px;
+  max-width: 90%;
+}
+.right-column {
+  flex: 1;
+  min-width: 200px;
+}
+.card {
+  height: 100%;
+  border: 1px solid rgba(0,0,0,.125);  
+  display: flex;
+  flex-direction: column;
+}
+.card-scroll {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+},
+.modal-backdrop.show {
+  z-index: 2056 !important;
+}
+.modal.show {
+  z-index: 2057 !important;
+}
+.modal-dialog {
+  z-index: 2057 !important;
+}
+.resizable-column {
+  z-index: 1000;  /* Base z-index for normal state */
+}
+.resizable-column .card-fullscreen,
+.resizable-column .bslib-card.card-fullscreen,
+.resizable-column .bslib-navs-underline,
+.resizable-column .nav-tabs-container {
+  z-index: 1055 !important;
+}
+/* Ensure the modal is always on top */
+body.modal-open .modal {
+  z-index: 2057 !important;
+}
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-left,
+.leaflet-right,
+.leaflet-control-container,
+.leaflet-control-zoom,
+.leaflet-control-attribution,
+.leaflet-control-layers,
+.leaflet-pane {
+  z-index: 800 !important;
+}
+
+/* plotly modebar on bottom */
+
+body .js-plotly-plot .plotly .modebar {
+  position: absolute !important;
+  top: unset !important;
+  bottom: -2px !important;
+  left: 8px !important;    /* Position from left edge instead of right */
+  right: unset !important; /* Remove right positioning */
+}
+
+body .js-plotly-plot .plotly .modebar-container {
+  position: absolute !important;
+  top: unset !important;
+  bottom: -2px !important;
+  left: 8px !important;    /* Position from left edge instead of right */
+  right: unset !important; /* Remove right positioning */
+}

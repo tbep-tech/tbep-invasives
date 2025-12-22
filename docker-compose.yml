@@ -1,0 +1,12 @@
+services:
+  tbep-invasives-app:
+    build: .
+    ports:
+      - "8430:8430"
+    volumes:
+      - ./config:/app/config
+      - ./input_data:/app/input_data
+      - ./derived_data:/app/derived_data
+      - ./outputs:/app/outputs
+    environment:
+      - TBEP_CONFIG=/app/config/settings.yaml

@@ -1,0 +1,17 @@
+[metadata]
+name = tbep-invasives
+version = 0.1.0
+description = TBEP invasives pipeline and dashboard
+license = Proprietary
+platforms = any
+
+[options]
+package_dir =
+    = src
+packages = find:
+python_requires = >=3.10
+include_package_data = True
+zip_safe = False
+
+[options.packages.find]
+where = src

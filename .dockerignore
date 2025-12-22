@@ -1,0 +1,10 @@
+.venv/
+.venv_clean/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+outputs/
+derived_data/
+.ipynb_checkpoints/
+*.log

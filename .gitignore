@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+*.pyo
+*.pyd
+.venv/
+.venv_clean/
+venv/
+.env
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+.ipynb_checkpoints/
+
+# Generated outputs (recommended)
+outputs/
+derived_data/
+
+# Local logs
+*.log

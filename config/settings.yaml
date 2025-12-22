@@ -1,0 +1,80 @@
+project:
+  name: tbep-invasives
+
+requests:
+  verify_ssl: false     # set false only if needed
+  ca_bundle: null      # or "C:/path/to/corp-ca.pem"
+
+paths:
+  input_data_dir: input_data
+  derived_data_dir: derived_data
+  outputs_dir: outputs
+
+  shp_dir: input_data/shp
+  rasters_dir: input_data/rasters
+  tables_dir: input_data/tables
+
+  aoi_shp: input_data/shp/TBEP_AOI_4326.shp
+  municipalities_shp: input_data/shp/TBEP_Municipalities_4326.shp
+  bay_segments_shp: input_data/shp/TBEP_Bay_Segments_4326.shp
+  hexbins_shp: input_data/shp/Hexbins_2mi_4326.shp
+
+  flam_raster: input_data/rasters/FLAM_2023_AOI.tif
+  invasives_concern_csv: input_data/tables/invasives_concern.csv
+
+derived:
+  invasives_dir: derived_data/invasives
+  rasters_dir: derived_data/rasters
+  shp_dir: derived_data/shp
+  report_cards_dir: derived_data/report_cards
+
+  invasives_csv: derived_data/invasives/invasive_species.csv
+  invasives_geojson: derived_data/invasives/invasive_species.geojson
+
+  flam_overlay_png: derived_data/rasters/FLAM_overlay.png
+  flam_meta_json: derived_data/rasters/flam_meta.json
+
+  hexbins_v2_shp: derived_data/shp/Hexbins_2mi_4326_v2.shp
+
+
+run:
+  run_id: null              # e.g., "2025Q1" when you want; if null we’ll auto-generate
+  archive_outputs: true     # write to outputs/<run_id>/...
+  update_derived: true      # copy latest into derived_data/...
+
+parameters:
+  min_year: 2000
+  huc8_list:
+    - "03100101"
+    - "03100201"
+    - "03100202"
+    - "03100203"
+    - "03100204"
+    - "03100205"
+    - "03100206"
+    - "03100207"
+    - "03100208"
+
+
+flam_overlay:
+  colormap: viridis
+  alpha: 160
+
+hex_enrichment:
+  progress_every: 200
+
+report_cards:
+  value_mode: percentile          # raw | percentile
+  color_ramp: white_teal_blue     # white_teal_blue | hulk
+  exclude_year: null              # e.g. 2025, or null
+  include_total: true
+  area_units: sqmi                # acre | sqft | sqmi
+  min_display_threshold: 0.0001
+  show_plots: false               # keep false for batch runs
+  filename_suffix: ""             # e.g. "_V4_3" if you want versioned names
+
+app:
+  host: 127.0.0.1
+  port: 8430
+  debug: true
+

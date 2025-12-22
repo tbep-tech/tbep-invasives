@@ -1,0 +1,15 @@
+numpy
+pandas
+geopandas
+shapely
+pyproj
+rasterio
+matplotlib
+scipy
+requests
+rapidfuzz
+PyYAML
+plotly
+dash
+dash-bootstrap-components
+gunicorn
