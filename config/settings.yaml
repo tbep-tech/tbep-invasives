@@ -2,7 +2,7 @@ project:
   name: tbep-invasives
 
 requests:
-  verify_ssl: false     # set false only if needed
+  verify_ssl: true     # set false only if needed
   ca_bundle: null      # or "C:/path/to/corp-ca.pem"
 
 paths:
