@@ -1,0 +1,133 @@
+name: Docker App E2E (Pipeline + Gunicorn)
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Optional run_id (e.g., 2025Q1). Leave blank to auto-generate."
+        required: false
+        default: ""
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: |
+          docker build -t tbep-invasives:ci .
+
+      - name: Ensure output folders exist
+        run: |
+          mkdir -p derived_data outputs
+
+      - name: Write CI config (settings_ci.yaml) inside container
+        env:
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          docker run --rm \
+            -v "${PWD}/config:/app/config" \
+            tbep-invasives:ci \
+            python - <<'PY'
+          import os
+          from pathlib import Path
+          import yaml
+
+          base = Path("/app/config/settings.yaml")
+          out  = Path("/app/config/settings_ci.yaml")
+
+          cfg = yaml.safe_load(base.read_text(encoding="utf-8"))
+
+          # Force SSL verification ON in CI
+          cfg.setdefault("requests", {})
+          cfg["requests"]["verify_ssl"] = True
+
+          # Set a run_id for traceability
+          user_run_id = (os.environ.get("INPUT_RUN_ID") or "").strip()
+          if not user_run_id:
+              user_run_id = f"CI-{os.environ.get('GITHUB_RUN_NUMBER','0')}-{os.environ.get('GITHUB_SHA','')[:7]}"
+
+          cfg.setdefault("run", {})
+          cfg["run"]["run_id"] = user_run_id
+          cfg["run"]["archive_outputs"] = True
+          cfg["run"]["update_derived"] = True
+
+          out.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
+          print("Wrote:", out)
+          print("run_id:", user_run_id)
+          PY
+
+      - name: Run quarterly pipeline inside container
+        run: |
+          docker run --rm \
+            -e TBEP_CONFIG=/app/config/settings_ci.yaml \
+            -e MPLBACKEND=Agg \
+            -v "${PWD}/config:/app/config" \
+            -v "${PWD}/input_data:/app/input_data" \
+            -v "${PWD}/derived_data:/app/derived_data" \
+            -v "${PWD}/outputs:/app/outputs" \
+            tbep-invasives:ci \
+            python /app/src/tbep_invasives/pipeline/quarterly.py
+
+      - name: Start Gunicorn container
+        run: |
+          docker run -d --name tbep_app \
+            -e TBEP_CONFIG=/app/config/settings_ci.yaml \
+            -v "${PWD}/config:/app/config" \
+            -v "${PWD}/input_data:/app/input_data" \
+            -v "${PWD}/derived_data:/app/derived_data" \
+            -v "${PWD}/outputs:/app/outputs" \
+            -p 8430:8430 \
+            tbep-invasives:ci
+
+      - name: Wait for HTTP and smoke test
+        run: |
+          set -e
+          for i in $(seq 1 40); do
+            code=$(curl -sS -L -o /dev/null -w "%{http_code}" http://127.0.0.1:8430/ || true)
+            if [ "$code" = "200" ]; then
+              echo "App is up (HTTP 200)."
+              exit 0
+            fi
+            echo "Waiting for app... (got $code) attempt $i"
+            sleep 2
+          done
+          echo "App did not become ready in time."
+          docker logs tbep_app || true
+          exit 1
+
+      - name: Capture container logs
+        if: always()
+        run: |
+          mkdir -p outputs/_ci
+          docker logs tbep_app > outputs/_ci/gunicorn.log 2>&1 || true
+
+      - name: Stop container
+        if: always()
+        run: |
+          docker rm -f tbep_app || true
+
+      - name: Upload derived_data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: derived_data
+          path: derived_data
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload outputs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs
+          if-no-files-found: warn
+          retention-days: 14
