@@ -92,18 +92,20 @@ jobs:
       - name: Wait for HTTP and smoke test
         run: |
           set -e
+      
           for i in $(seq 1 40); do
-            code=$(curl -f http://127.0.0.1:8430/ > /dev/null
-            curl -f http://127.0.0.1:8430/_dash-layout > /dev/null
-            curl -f http://127.0.0.1:8430/_dash-dependencies > /dev/null
-            )
-            if [ "$code" = "200" ]; then
-              echo "App is up (HTTP 200)."
+            echo "Attempt $i: checking endpoints..."
+            if curl -fsS http://127.0.0.1:8430/ >/dev/null \
+              && curl -fsS http://127.0.0.1:8430/_dash-layout >/dev/null \
+              && curl -fsS http://127.0.0.1:8430/_dash-dependencies >/dev/null; then
+              echo "App is up (/, _dash-layout, _dash-dependencies all OK)."
               exit 0
             fi
-            echo "Waiting for app... (got $code) attempt $i"
+      
+            echo "Not ready yet; sleeping..."
             sleep 2
           done
+      
           echo "App did not become ready in time."
           docker logs tbep_app || true
           exit 1
