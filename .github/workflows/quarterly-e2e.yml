@@ -1,0 +1,99 @@
+name: Quarterly Pipeline E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Optional run_id (e.g., 2025Q1). Leave blank to auto-generate CI-<run>-<sha>."
+        required: false
+        default: ""
+
+jobs:
+  quarterly-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt
+          python -m pip check
+
+      - name: Create CI config (run_id + SSL verify)
+        run: |
+          python - <<'PY'
+          import os, yaml
+          from pathlib import Path
+
+          base = Path("config/settings.yaml")
+          out = Path("config/settings_ci.yaml")
+
+          cfg = yaml.safe_load(base.read_text(encoding="utf-8"))
+
+          # Use SSL verification in GitHub Actions
+          cfg.setdefault("requests", {})
+          cfg["requests"]["verify_ssl"] = True
+
+          # Set run_id for traceability
+          user_run_id = os.environ.get("INPUT_RUN_ID", "").strip()
+          if not user_run_id:
+            user_run_id = f"CI-{os.environ.get('GITHUB_RUN_NUMBER','0')}-{os.environ.get('GITHUB_SHA','')[:7]}"
+          cfg.setdefault("run", {})
+          cfg["run"]["run_id"] = user_run_id
+          cfg["run"]["archive_outputs"] = True
+          cfg["run"]["update_derived"] = True
+
+          out.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")
+          print("Wrote:", out)
+          print("run_id:", user_run_id)
+          PY
+        env:
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+
+      - name: Run quarterly pipeline
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+          TBEP_CONFIG: ${{ github.workspace }}/config/settings_ci.yaml
+          MPLBACKEND: Agg
+        run: |
+          python -u src/tbep_invasives/pipeline/quarterly.py
+
+      - name: Dashboard factory smoke test (after pipeline)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+          TBEP_CONFIG: ${{ github.workspace }}/config/settings_ci.yaml
+        run: |
+          python - <<'PY'
+          from tbep_invasives.paths import load_config
+          from tbep_invasives.app.dashboard import create_app
+
+          cfg = load_config()
+          app = create_app(cfg)
+          print("create_app OK:", type(app))
+          PY
+
+      - name: Upload derived_data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: derived_data
+          path: derived_data
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload outputs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs
+          if-no-files-found: warn
+          retention-days: 14
