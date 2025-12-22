@@ -1,0 +1,79 @@
+name: CI Smoke Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt
+          python -m pip check
+
+      - name: Compile modules
+        run: |
+          python -m compileall src/tbep_invasives -q
+
+      - name: Import smoke tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+          TBEP_CONFIG: ${{ github.workspace }}/config/settings.yaml
+        run: |
+          python - <<'PY'
+          import sys
+          print("Python:", sys.version)
+
+          # Core deps
+          import numpy, pandas, geopandas, rasterio, dash, plotly
+          print("Core deps import OK")
+
+          # Package imports
+          import tbep_invasives
+          print("tbep_invasives import OK:", tbep_invasives.__file__)
+
+          # Import key modules (should not execute heavy work at import time)
+          import tbep_invasives.paths
+          import tbep_invasives.pipeline.quarterly
+          import tbep_invasives.pipeline.preflight
+          import tbep_invasives.app.dashboard
+          print("Key module imports OK")
+
+          # Config + path resolution
+          from tbep_invasives.paths import load_config, resolve_path
+          cfg = load_config()
+          print("Config loaded OK. Project:", (cfg.get("project") or {}).get("name"))
+
+          # Resolve a few known keys (should not require files to exist)
+          keys = [
+              "paths.input_data_dir",
+              "paths.outputs_dir",
+              "paths.derived_data_dir",
+              "derived.invasives_csv",
+              "derived.flam_meta_json",
+              "derived.hexbins_v2_shp",
+          ]
+          for k in keys:
+              p = resolve_path(cfg, k)
+              print(f"{k} -> {p}")
+
+          print("Smoke tests complete.")
+          PY
