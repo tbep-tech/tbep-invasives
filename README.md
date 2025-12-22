@@ -228,3 +228,35 @@ py -3.9 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -U pip
 python -m pip install -r requirements.txt
+
+
+## Verification (GitHub Actions)
+
+This repo includes manual GitHub Actions workflows used to validate the system on a clean Linux runner.
+
+### Quarterly Pipeline E2E
+Runs the full quarterly pipeline end-to-end and uploads artifacts.
+- Produces: `derived_data/` (latest snapshot) and `outputs/` (archived run outputs)
+- Artifacts are downloadable from the workflow run summary.
+
+How to run:
+1) GitHub → Actions → **Quarterly Pipeline E2E** → Run workflow
+2) Optionally provide `run_id` (e.g., `2025Q1`)
+
+### Docker App E2E (Pipeline + Gunicorn)
+Validates Docker deployment by:
+1) Building the Docker image
+2) Running the quarterly pipeline inside the container
+3) Starting Gunicorn and verifying Dash endpoints respond
+
+The workflow checks:
+- `/`
+- `/_dash-layout`
+- `/_dash-dependencies`
+
+A successful run indicates the containerized app is deployable and healthy.
+
+Artifacts:
+- `derived_data` (latest snapshot)
+- `outputs` (including CI logs when enabled)
+
