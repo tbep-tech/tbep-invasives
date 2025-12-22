@@ -93,7 +93,10 @@ jobs:
         run: |
           set -e
           for i in $(seq 1 40); do
-            code=$(curl -sS -L -o /dev/null -w "%{http_code}" http://127.0.0.1:8430/ || true)
+            code=$(curl -f http://127.0.0.1:8430/ > /dev/null
+            curl -f http://127.0.0.1:8430/_dash-layout > /dev/null
+            curl -f http://127.0.0.1:8430/_dash-dependencies > /dev/null
+            )
             if [ "$code" = "200" ]; then
               echo "App is up (HTTP 200)."
               exit 0
