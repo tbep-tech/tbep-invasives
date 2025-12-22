@@ -17,8 +17,10 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Generated outputs (recommended)
-outputs/
-derived_data/
+outputs/*
+derived_data/*
+!outputs/.gitkeep
+!derived_data/.gitkeep
 
 # Local logs
 *.log
