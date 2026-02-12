@@ -243,10 +243,18 @@ def render_map_tab(group_vals, bay_vals, muni_vals, name_options, min_year, max_
             "position": "absolute", "top": "90px", "right": "10px", "zIndex": 1200, "maxWidth": "40%"
         }),
 
-        dcc.Graph(
-            id="map",
-            style={'position': 'absolute', 'top': "85px", 'left': 0, 'right': 0, 'bottom': 0, 'zIndex': 0},
-            config={'scrollZoom': True}
+        dcc.Loading(
+            id="loading-map",
+            type="default",
+            color="#00bc8c",
+            style={"position": "absolute", "top": "85px", "left": 0, "right": 0, "bottom": 0, "zIndex": 0},
+            children=[
+                dcc.Graph(
+                    id="map",
+                    style={"width": "100%", "height": "calc(120vh - 0px)"},
+                    config={'scrollZoom': True}
+                )
+            ]
         )
     ], style={"position": "fixed", "top": 0, "left": 0, "right": 0, "bottom": 0, "zIndex": 0})
 
