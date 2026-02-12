@@ -164,13 +164,13 @@ def render_overview_tab() -> dbc.Container:
 def render_map_tab(group_vals, bay_vals, muni_vals, name_options, min_year, max_year) -> html.Div:
     return html.Div([
         dcc.Store(id="left-panel-style", data={
-            "position": "absolute", "top": "85px", "left": "0", "width": "340px",
-            "maxHeight": "calc(100vh - 85px)", "overflowY": "auto",
+            "position": "absolute", "top": "80px", "left": "0", "width": "340px",
+            "maxHeight": "calc(100vh - 80px)", "overflowY": "auto",
             "backgroundColor": "rgba(248, 249, 250, 0.9)", "zIndex": 1000,
             "padding": "20px", "borderRight": "1px solid #ccc"
         }),
         html.Button("❮", id="toggle-left", className="btn btn-light", style={
-            "position": "absolute", "top": "85px", "left": "0", "zIndex": 1100,
+            "position": "absolute", "top": "80px", "left": "0", "zIndex": 1100,
             "borderRadius": "0 4px 4 0", "boxShadow": "2px 2px 6px rgba(0,0,0,0.2)"
         }),
         html.Div([
@@ -247,11 +247,11 @@ def render_map_tab(group_vals, bay_vals, muni_vals, name_options, min_year, max_
             id="loading-map",
             type="default",
             color="#00bc8c",
-            style={"position": "absolute", "top": "85px", "left": 0, "right": 0, "bottom": 0, "zIndex": 0},
+            style={'position': 'absolute', 'top': '300px'},
             children=[
                 dcc.Graph(
                     id="map",
-                    style={"width": "100%", "height": "calc(120vh - 0px)"},
+                    style={'position': 'fixed', 'top': "80px", 'left': 0, 'right': 0, 'bottom': 0, 'zIndex': 0},
                     config={'scrollZoom': True}
                 )
             ]
@@ -411,7 +411,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
 
     valid_years = gdf["Year"].dropna().astype(int)
     min_year = int(valid_years.min()) if not valid_years.empty else 1990
-    max_year = int(valid_years.max()) if not valid_years.empty else 2025
+    max_year = 2025 # int(valid_years.max()) if not valid_years.empty else 2025
 
     # group colors
     COLORS = ["#C44536", "#F4A261", "#3D5A80", "#6A4C93", "#E9C46A", "#2A9D8F", "#E07A5F"]
@@ -452,7 +452,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
                 style={"display": "none"}
             ),
             html.Div(id="summary-tab-content", children=render_summary_tab(), style={"display": "none"})
-        ], style={"marginTop": "60px"})
+        ], style={"marginTop": "70px"})
     ])
 
     # ------------------ Tab switching ------------------
@@ -484,8 +484,8 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
     def toggle_left_panel(n, is_open):  # noqa: ANN001
         new_state = not is_open
         style = {
-            "position": "absolute", "top": "85px", "left": "0", "width": "340px",
-            "maxHeight": "calc(100vh - 85px)", "overflowY": "auto",
+            "position": "absolute", "top": "80px", "left": "0", "width": "340px",
+            "maxHeight": "calc(100vh - 80px)", "overflowY": "auto",
             "backgroundColor": "rgba(248, 249, 250, 0.9)", "zIndex": 1000,
             "padding": "20px", "borderRight": "1px solid #ccc"
         } if new_state else {"display": "none"}
