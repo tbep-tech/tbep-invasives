@@ -431,7 +431,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
                     dbc.Tab(label="Overview", tab_id="overview-tab"),
                     dbc.Tab(label="Map", tab_id="map-tab"),
                     dbc.Tab(label="Summary", tab_id="summary-tab"),
-                ], id="tabs", active_tab="map-tab")
+                ], id="tabs", active_tab="overview-tab")
             ]),
             color="success", dark=True,
             style={"position": "fixed", "top": 0, "left": 0, "right": 0, "zIndex": 1030}
@@ -441,7 +441,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
             html.Div(
                 id="map-tab-content",
                 children=render_map_tab(group_vals, bay_vals, muni_vals, name_options, min_year, max_year),
-                style={"display": "block"}
+                style={"display": "none"}
             ),
             html.Div(id="summary-tab-content", children=render_summary_tab(), style={"display": "none"})
         ], style={"marginTop": "60px"})
