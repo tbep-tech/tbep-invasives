@@ -98,7 +98,7 @@ def _safe_date_str(s: Any) -> str:
 def render_overview_tab() -> dbc.Container:
     return dbc.Container([
         html.Div([
-            html.P("WELCOME TO THE TAMPA BAY INVASIVES DASHBOARD",
+            html.P("WELCOME TO THE TAMPA BAY NON-NATIVE SPECIES DASHBOARD",
                    style={"fontWeight": "bold", "fontSize": "1rem", "marginBottom": "0.5rem"}),
 
             html.Img(src="/assets/cubantreefrog.png", style={
@@ -106,7 +106,7 @@ def render_overview_tab() -> dbc.Container:
             }),
 
             html.P(
-                "The Tampa Bay Invasive Species Dashboard offers a comprehensive view of invasive species distributions "
+                "The Tampa Bay Non-Native Species Dashboard offers a comprehensive view of non-native species distributions "
                 "alongside ecological indicators throughout the Tampa Bay region. By integrating spatial and temporal data "
                 "with ecological metrics such as the Florida Landscape Assessment Model (FLAM), this dashboard supports "
                 "informed regional management and conservation efforts."
@@ -116,13 +116,13 @@ def render_overview_tab() -> dbc.Container:
                 html.A("MAP:", href="#map-tab", id="map-link",
                        style={"fontWeight": "bold", "fontSize": "1rem", "cursor": "pointer",
                               "textDecoration": "underline", "color": "#0d6efd"}),
-                " The Map tab enables users to visualize invasive data overlaid with FLAM ecological rankings. "
+                " The Map tab enables users to visualize non-native species data overlaid with FLAM ecological rankings. "
                 "Interactive filters allow exploration by species, group, year, municipality, waterbody segments, and location accuracy, "
                 "providing a dynamic tool to analyze spatial patterns and identify hotspots across the bay."
             ]),
 
             html.P(
-                "This dashboard includes invasive species records classified as both “accurate” and “approximate” locations. "
+                "This dashboard includes non-native species records classified as both “accurate” and “approximate” locations. "
                 "Hexagonal binning aggregates spatial data, balancing broad data inclusion with spatial precision to "
                 "facilitate effective visualization and hotspot detection."
             ),
@@ -140,9 +140,9 @@ def render_overview_tab() -> dbc.Container:
                 html.A("Marcus Beck", href="mailto:mbeck@tbep.org",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
                 ". The page source content can be viewed on ",
-                html.A("Github", href="https://github.com/DrummondCarpenter/TBEP_HTB_Invasives.git", target="_blank",
+                html.A("Github", href="https://github.com/tbep-tech/tbep-invasives", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
-                ". Invasive species data were obtained from the ",
+                ". Non-native species data were obtained from the ",
                 html.A("USGS NAS Dataset", href="https://nas.er.usgs.gov", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
                 ". FLAM  data were obtained from the ",
@@ -263,7 +263,7 @@ def render_summary_tab() -> dbc.Container:
     return dbc.Container([
         html.Div(id="summary-no-data-banner", className="mb-2"),
 
-        html.H4("Summary of Filtered Invasive Species"),
+        html.H4("Summary of Filtered Non-Native Species"),
         html.P("Based on map filtering, your study area contains:", className="text-muted",
                style={"marginBottom": "0.5rem"}),
         html.Div(id="active-filters", className="mb-3"),
@@ -426,7 +426,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
         suppress_callback_exceptions=True,
         assets_folder=str(assets_dir),
     )
-    app.title = "TAMPA BAY INVASIVE SPECIES DASHBOARD"
+    app.title = "TAMPA BAY NON-NATIVE SPECIES DASHBOARD"
 
     # Layout
     app.layout = html.Div([
@@ -434,7 +434,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
         dcc.Store(id="filtered-data-store"),
         dbc.Navbar(
             dbc.Container([
-                dbc.NavbarBrand("TAMPA BAY INVASIVE SPECIES DASHBOARD"),
+                dbc.NavbarBrand("TAMPA BAY NON-NATIVE SPECIES DASHBOARD"),
                 dbc.Tabs([
                     dbc.Tab(label="Overview", tab_id="overview-tab"),
                     dbc.Tab(label="Map", tab_id="map-tab"),
@@ -880,7 +880,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
         out = df[cols].copy()
         out["date"] = pd.to_datetime(out["date"], errors="coerce").dt.strftime("%Y-%m-%d")
 
-        filename = f"invasives_filtered_{time.strftime('%Y%m%d_%H%M%S')}.csv"
+        filename = f"nonnatives_filtered_{time.strftime('%Y%m%d_%H%M%S')}.csv"
         return dcc.send_data_frame(out.to_csv, filename, index=False)
 
     # URL hash -> tab
