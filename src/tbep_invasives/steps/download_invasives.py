@@ -185,7 +185,7 @@ def fetch_fim_invasives_data(fim_url: str) -> List[Dict[str, Any]]:
         df['county'] = None
         df['locality'] = 'Tampa Bay'
         df['latLongSource'] = 'FIM Survey'
-        df['latLongAccuracy'] = 'GPS'
+        df['latLongAccuracy'] = 'Accurate'
         df['Centroid Type'] = ''
         df['huc8Name'] = ''
         df['huc8'] = ''

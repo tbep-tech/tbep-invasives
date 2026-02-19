@@ -145,6 +145,9 @@ def render_overview_tab() -> dbc.Container:
                 ". Non-native species data were obtained from the ",
                 html.A("USGS NAS Dataset", href="https://nas.er.usgs.gov", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
+                " and the FWC FIM Database, curated to extract non-native species by the Tampa Bay Estuary Program on ",
+                html.A("GitHub", href="https://github.com/kflahertywalia/tb_fim_data/tree/main/Output", target="_blank",
+                       style={"textDecoration": "underline", "color": "#0d6efd"}),
                 ". FLAM  data were obtained from the ",
                 html.A("FWC FLAM Dataset", href="https://myfwc.com/research/gis/", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
@@ -155,7 +158,11 @@ def render_overview_tab() -> dbc.Container:
                 html.A("wildlife invasive species", href="https://myfwc.com/wildlifehabitats/profiles/#!categoryid=&subcategoryid=&status=Invasive",
                        target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
-                ".",
+                ". Additional information about the data products and methods used to create this dashboard can be found in TBEP technical publication ",
+                html.A("#05-26", href="https://drive.google.com/file/d/1Des3GsvmFvOpd8yEXd2SPlSN-mKVxoAG/view", 
+                        target="_blank",
+                       style={"textDecoration": "underline", "color": "#0d6efd"}), 
+                "."
             ]),
         ], style={"maxWidth": "700px", "margin": "0 auto", "paddingTop": "15px"})
     ])
