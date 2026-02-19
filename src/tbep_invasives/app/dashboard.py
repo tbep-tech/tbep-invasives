@@ -146,7 +146,7 @@ def render_overview_tab() -> dbc.Container:
                 html.A("USGS NAS Dataset", href="https://nas.er.usgs.gov", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
                 " and the FWC FIM Database, curated to extract non-native species by the Tampa Bay Estuary Program on ",
-                html.A("GitHub", href="https://github.com/kflahertywalia/tb_fim_data/tree/main/Output", target="_blank",
+                html.A("GitHub", href="https://github.com/kflahertywalia/tb_fim_data/", target="_blank",
                        style={"textDecoration": "underline", "color": "#0d6efd"}),
                 ". FLAM  data were obtained from the ",
                 html.A("FWC FLAM Dataset", href="https://myfwc.com/research/gis/", target="_blank",
