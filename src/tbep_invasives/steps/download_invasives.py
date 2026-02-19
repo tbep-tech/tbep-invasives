@@ -28,12 +28,15 @@ import shutil
 import pandas as pd
 import geopandas as gpd
 import requests
+import rdata as rd
+
 
 logger = logging.getLogger(__name__)
 
 CRS_EPSG = "EPSG:4326"
 NAS_OCCURRENCE_URL = "https://nas.er.usgs.gov/api/v2/occurrence/search"
-
+FIM_URL = "https://github.com/kflahertywalia/tb_fim_data/raw/refs/heads/main/Output/tb_fim_inv.RData"
+FIM_INVASIVES_KEY = "https://github.com/kflahertywalia/tb_fim_data/raw/refs/heads/main/Output/fim_nonnative_list.csv"
 
 # --- import config helpers with a fallback for running this file directly ---
 try:
@@ -118,6 +121,136 @@ def fetch_invasive_species_data(
     logger.info("Total rows fetched: %s", len(all_rows))
     return all_rows
 
+def parse_fim_reference_date(reference: str) -> Dict[str, Any]:
+    """
+    Parse FIM Reference field to extract date components.
+    Format: TBD2005013902 or TBM2000051203
+    Where: TBD/TBM + YYYY + MM + DD + sequence
+    """
+    try:
+        if not isinstance(reference, str) or len(reference) < 13:
+            return {'year': None, 'month': None, 'day': None}
+        
+        # Extract date portion (skip first 3 chars like TBD/TBM)
+        date_part = reference[3:11]  # YYYYMMDD
+        year = int(date_part[0:4])
+        month = int(date_part[4:6])
+        day = int(date_part[6:8])
+        
+        # Validate and handle invalid dates
+        if month < 1 or month > 12:
+            month = None
+        if day < 1 or day > 31:
+            day = None
+            
+        return {'year': year, 'month': month, 'day': day}
+    except (ValueError, IndexError):
+        return {'year': None, 'month': None, 'day': None}
+
+
+def fetch_fim_invasives_data(fim_url: str) -> List[Dict[str, Any]]:
+    """Fetch invasive species list from FIM RData - returns list of dicts like NAS function."""
+    try:
+            
+        # Fetch and parse the RData file
+        rdata_content = requests.get(fim_url).content
+        parsed = rd.parser.parse_data(rdata_content)
+        rdata_converted = rd.conversion.convert(parsed)
+
+        # Extract the DataFrame from the 'inv' key
+        df = rdata_converted['inv']
+        
+        # Parse date from Reference field
+        date_info = df['Reference'].apply(parse_fim_reference_date)
+        df['year'] = [d['year'] for d in date_info]
+        df['month'] = [d['month'] for d in date_info]
+        df['day'] = [d['day'] for d in date_info]
+        
+        # Rename columns to match NAS format
+        df = df.rename(columns={
+            'Scientificname': 'scientificName',
+            'Commonname': 'commonName',
+            'Latitude': 'decimalLatitude',
+            'Longitude': 'decimalLongitude',
+            'Taxa_Type': 'group',
+            'Reference': 'key',  # Use Reference as unique identifier
+        })
+        
+        # Add placeholder columns that exist in NAS but not in FIM
+        df['speciesID'] = None
+        df['family'] = df.get('family_nm', None)  # Use family_nm if available
+        df['genus'] = None
+        df['species'] = None
+        df['state'] = 'Florida'
+        df['county'] = None
+        df['locality'] = 'Tampa Bay'
+        df['latLongSource'] = 'FIM Survey'
+        df['latLongAccuracy'] = 'GPS'
+        df['Centroid Type'] = ''
+        df['huc8Name'] = ''
+        df['huc8'] = ''
+        df['huc10Name'] = ''
+        df['huc10'] = ''
+        df['huc12Name'] = ''
+        df['huc12'] = ''
+        df['status'] = 'collected'
+        df['comments'] = ''
+        df['recordType'] = 'Specimen'
+        df['disposal'] = ''
+        df['museumCatNumber'] = ''
+        df['freshMarineIntro'] = 'Marine'
+        df['UUID'] = ''
+        df['references'] = None  # FIM doesn't have references like NAS
+        
+        # Build date string (format: 'YYYY-M' or 'YYYY-M-D')
+        def build_date_string(row):
+            if pd.isna(row['year']):
+                return None
+            date_str = str(int(row['year']))
+            if pd.notna(row['month']):
+                date_str += f"-{int(row['month'])}"
+                if pd.notna(row['day']):
+                    date_str += f"-{int(row['day'])}"
+            return date_str
+        
+        df['date'] = df.apply(build_date_string, axis=1)
+        
+        # Normalize group names to match NAS (if needed)
+        group_mapping = {
+            'Fish': 'Fishes',
+            'Turtle': 'Reptiles',
+            # Add more mappings as needed
+        }
+        if 'group' in df.columns:
+            df['group'] = df['group'].replace(group_mapping)
+
+        # Remove any rows where group is not Fishes or Reptiles
+        df = df[df['group'].isin(['Fishes', 'Reptiles'])]
+
+        # Select only the columns that match NAS format (in similar order)
+        nas_columns = [
+            'key', 'speciesID', 'group', 'family', 'genus', 'species',
+            'scientificName', 'commonName', 'state', 'county', 'locality',
+            'decimalLatitude', 'decimalLongitude', 'latLongSource', 'latLongAccuracy',
+            'Centroid Type', 'huc8Name', 'huc8', 'huc10Name', 'huc10',
+            'huc12Name', 'huc12', 'date', 'year', 'month', 'day',
+            'status', 'comments', 'recordType', 'disposal', 'museumCatNumber',
+            'freshMarineIntro', 'UUID', 'references'
+        ]
+        
+        # Keep only columns that exist and are in our target list
+        available_columns = [col for col in nas_columns if col in df.columns]
+        df = df[available_columns]
+        
+        # Convert to list of dicts (same format as NAS function)
+        records = df.to_dict('records')
+        
+        logger.info("Fetched FIM invasives data with %s rows.", len(records))
+        return records
+
+    except Exception as exc:
+        logger.exception("Failed to fetch/process FIM invasives data: %s", exc)
+        return []
 
 def clean_and_format_dates(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -155,7 +288,6 @@ def clip_to_aoi(gdf: gpd.GeoDataFrame, aoi_path: Path) -> gpd.GeoDataFrame:
         aoi = aoi.to_crs(gdf.crs)
     return gpd.clip(gdf, aoi)
 
-
 def filter_by_year(
     gdf: gpd.GeoDataFrame,
     *,
@@ -172,7 +304,6 @@ def filter_by_year(
     out = gdf.loc[keep].copy()
     logger.info("Year filter (>= %s): kept %s of %s rows", min_year, len(out), len(gdf))
     return out
-
 
 def spatial_intersect_add_fields(
     gdf: gpd.GeoDataFrame,
@@ -332,7 +463,7 @@ def add_top_concern(
 
 
 def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
-    """Run the full NAS download + spatial enrichment step."""
+    """Run the full NAS + FIM download + spatial enrichment step."""
     # --- config ---
     huc8_list = cfg.get("parameters", {}).get(
         "huc8_list",
@@ -365,21 +496,33 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
     out_csv = resolve_path(cfg, "derived.invasives_csv")
     out_geojson.parent.mkdir(parents=True, exist_ok=True)
 
-    # --- fetch + dataframe ---
-    data = fetch_invasive_species_data(huc8_list, verify_ssl=verify_ssl)
-    df = pd.DataFrame(data)
+    # --- fetch NAS data ---
+    logger.info("Fetching NAS invasive species data...")
+    nas_data = fetch_invasive_species_data(huc8_list, verify_ssl=verify_ssl)
+    logger.info("NAS records fetched: %s", len(nas_data))
+    
+    # --- fetch FIM data ---
+    logger.info("Fetching FIM invasive species data...")
+    fim_data = fetch_fim_invasives_data(FIM_URL)
+    logger.info("FIM records fetched: %s", len(fim_data))
+    
+    # --- combine datasets ---
+    combined_data = nas_data + fim_data
+    logger.info("Total combined records: %s", len(combined_data))
+    
+    df = pd.DataFrame(combined_data)
 
     if df.empty:
-        logger.warning("No records returned from NAS API. Writing empty outputs.")
+        logger.warning("No records returned. Writing empty outputs.")
         gdf_empty = gpd.GeoDataFrame(df, geometry=[], crs=CRS_EPSG)
         out_geojson.write_text(json.dumps({"type": "FeatureCollection", "features": []}), encoding="utf-8")
         df.to_csv(out_csv, index=False)
         return {"csv": out_csv, "geojson": out_geojson}
 
-    # Rename lat/lon
+    # Rename lat/lon (already standardized in both datasets)
     df = df.rename(columns={"decimalLatitude": "lat", "decimalLongitude": "lon"})
 
-    # Build date
+    # Build date (this will handle rows that already have date vs those that need it)
     df = clean_and_format_dates(df)
 
     # Normalize group names (optional)
@@ -395,6 +538,9 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
     }
     if "group" in df.columns:
         df["group"] = df["group"].replace(group_name_changes)
+
+    # Remove any rows where group is not those from above
+    df = df[df['group'].isin(["Amphibians", "Crustaceans", "Fishes", "Mammals", "Mollusks", "Plants", "Reptiles"])]
 
     # Geometry
     gdf = gpd.GeoDataFrame(
@@ -429,7 +575,7 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
         fuzzy_threshold=90,
     )
 
-    # Expand references
+    # Expand references (only for NAS data that has references)
     if "references" in gdf.columns:
         gdf = extract_reference_columns(gdf, ref_col="references")
 
@@ -507,6 +653,8 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
         # if you ever disable archiving, write directly to derived_data
         write_outputs(gdf, latest_csv, latest_geojson)
 
+    logger.info("Final output: %s total records (%s NAS, %s FIM)", 
+                len(gdf), len(nas_data), len(fim_data))
 
     return {"csv": out_csv, "geojson": out_geojson}
 
