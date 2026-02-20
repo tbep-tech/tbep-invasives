@@ -559,7 +559,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
             df = df[df["spatialAccuracy"].str.lower() == "accurate"]
 
         keep_cols = [
-            "scientificName", "commonName", "date", "Year", "group", "spatialAccuracy",
+            "source", "lon", "lat", "scientificName", "commonName", "date", "Year", "group", "spatialAccuracy",
             "baySegment", "municipality", "hexbinID", "firstOccur", "topConcern"
         ]
         out = df[keep_cols + ["geometry"]].copy()
@@ -878,7 +878,7 @@ def create_app(cfg: Dict[str, Any]) -> Dash:
         if df.empty:
             return dash.no_update
 
-        cols = ["lon", "lat", "scientificName", "commonName", "date", "Year", "group", "spatialAccuracy",
+        cols = ["source", "lon", "lat", "scientificName", "commonName", "date", "Year", "group", "spatialAccuracy",
                 "baySegment", "municipality", "hexbinID", "firstOccur", "topConcern"]
         for c in cols:
             if c not in df.columns:

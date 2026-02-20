@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 CRS_EPSG = "EPSG:4326"
 NAS_OCCURRENCE_URL = "https://nas.er.usgs.gov/api/v2/occurrence/search"
 FIM_URL = "https://github.com/kflahertywalia/tb_fim_data/raw/refs/heads/main/Output/tb_fim_inv.RData"
-FIM_INVASIVES_KEY = "https://github.com/kflahertywalia/tb_fim_data/raw/refs/heads/main/Output/fim_nonnative_list.csv"
 
 # --- import config helpers with a fallback for running this file directly ---
 try:
@@ -117,6 +116,10 @@ def fetch_invasive_species_data(
             logger.info("Fetched %s rows for HUC8=%s", len(rows), huc8)
         except Exception as exc:
             logger.exception("Fetch failed for HUC8=%s (%s)", huc8, exc)
+
+    # add source field to all rows
+    for row in all_rows:
+        row['source'] = 'NAS'
 
     logger.info("Total rows fetched: %s", len(all_rows))
     return all_rows
@@ -201,7 +204,8 @@ def fetch_fim_invasives_data(fim_url: str) -> List[Dict[str, Any]]:
         df['freshMarineIntro'] = 'Marine'
         df['UUID'] = ''
         df['references'] = None  # FIM doesn't have references like NAS
-        
+        df['source'] = 'FIM'
+
         # Build date string (format: 'YYYY-M' or 'YYYY-M-D')
         def build_date_string(row):
             if pd.isna(row['year']):
@@ -235,7 +239,7 @@ def fetch_fim_invasives_data(fim_url: str) -> List[Dict[str, Any]]:
             'Centroid Type', 'huc8Name', 'huc8', 'huc10Name', 'huc10',
             'huc12Name', 'huc12', 'date', 'year', 'month', 'day',
             'status', 'comments', 'recordType', 'disposal', 'museumCatNumber',
-            'freshMarineIntro', 'UUID', 'references'
+            'freshMarineIntro', 'UUID', 'references', 'source'
         ]
         
         # Keep only columns that exist and are in our target list
