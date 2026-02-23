@@ -1,5 +1,7 @@
 # TBEP Invasives (Quarterly Pipeline + Dashboard)
 
+[![DOI](https://zenodo.org/badge/1153688769.svg)](https://doi.org/10.5281/zenodo.18745854)
+
 This repository contains:
 1) A quarterly pipeline that downloads and derives invasive species datasets and supporting spatial layers.
 2) A Dash dashboard that visualizes the **latest** derived outputs.
