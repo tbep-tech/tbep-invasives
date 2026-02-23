@@ -224,7 +224,7 @@ def plot_report_card(
         else:
             cell.set_text_props(fontfamily=DATA_FONT, color="#000000", fontsize=9.5, fontweight="bold")
 
-    title = f"Non-native Species {plot_type} Report Card"
+    title = f"Non-Native Species {plot_type} Report Card"
     fig.suptitle(title, fontsize=18, fontfamily=HEADER_FONT, color="#005293", y=0.925)
     subtitle = {
         "Abundance": f"Based on observations {units_label}",
@@ -307,8 +307,17 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
     total_area_units = calc_aoi_area(aoi_path, units=area_units)
     watershed_area_units = calc_watershed_area(bay_segments_path, "BAY_SEG_GP", units=area_units)
 
-    ws_ab = per_watershed_abundance(df, watershed_area_units).sort_index()
-    ws_rich = per_watershed_richness(df, watershed_area_units).sort_index()
+    # Define desired column order (excluding "All" which is inserted separately)
+    BAY_SEG_ORDER = [
+        "Old Tampa Bay",
+        "Hillsborough Bay",
+        "Middle Tampa Bay",
+        "Lower Tampa Bay",
+        "Remainder Lower Tampa Bay",
+    ]
+
+    ws_ab = per_watershed_abundance(df, watershed_area_units).reindex(columns=BAY_SEG_ORDER)
+    ws_rich = per_watershed_richness(df, watershed_area_units).reindex(columns=BAY_SEG_ORDER)
 
     if include_total:
         ws_ab.insert(0, "All", total_aoi_abundance(df, total_area_units))
