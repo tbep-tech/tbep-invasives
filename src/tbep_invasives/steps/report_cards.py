@@ -176,7 +176,7 @@ def plot_report_card(
     if mode == "percentile":
         plot_values = as_percentile_by_mean_std(values_df)
         vmin, vmax = 0, 100
-        cbar_label = "Percentile (normalized by μ and σ)"
+        cbar_label = "Percentile (normalized by mean and standard deviation)"
         label_fmt = lambda x: "" if pd.isna(x) else f"{x:0.0f}"
     else:
         vmin = float(np.nanmin(plot_values.values))
@@ -224,11 +224,11 @@ def plot_report_card(
         else:
             cell.set_text_props(fontfamily=DATA_FONT, color="#000000", fontsize=9.5, fontweight="bold")
 
-    title = f"Waterbody Invasive Species {plot_type} Report Card"
+    title = f"Non-native Species {plot_type} Report Card"
     fig.suptitle(title, fontsize=18, fontfamily=HEADER_FONT, color="#005293", y=0.925)
     subtitle = {
-        "Abundance": f"Based on invasive species observations {units_label}",
-        "Richness": f"Based on species diversity {units_label}",
+        "Abundance": f"Based on observations {units_label}",
+        "Richness": f"Based on number of species {units_label}",
     }.get(plot_type, f"Based on metric {units_label}")
     ax.set_title(subtitle, fontsize=11, fontfamily=DATA_FONT, color="#4a4a4a", pad=15)
 
@@ -311,8 +311,8 @@ def run(cfg: Dict[str, Any]) -> Dict[str, Path]:
     ws_rich = per_watershed_richness(df, watershed_area_units).sort_index()
 
     if include_total:
-        ws_ab.insert(0, "Total AOI", total_aoi_abundance(df, total_area_units))
-        ws_rich.insert(0, "Total AOI", total_aoi_richness(df, total_area_units))
+        ws_ab.insert(0, "All", total_aoi_abundance(df, total_area_units))
+        ws_rich.insert(0, "All", total_aoi_richness(df, total_area_units))
 
     mode = "percentile" if value_mode.lower().startswith("percent") else "raw"
 
