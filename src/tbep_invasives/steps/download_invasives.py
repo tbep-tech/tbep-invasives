@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 CRS_EPSG = "EPSG:4326"
 NAS_OCCURRENCE_URL = "https://nas.er.usgs.gov/api/v2/occurrence/search"
-FIM_URL = "https://github.com/kflahertywalia/tb_fim_data/raw/refs/heads/main/Output/tb_fim_inv.RData"
+FIM_URL = "https://github.com/kflahertywalia/tb_fim_nonnatives/raw/refs/heads/main/Output/tb_fim_inv.RData"
 
 # --- import config helpers with a fallback for running this file directly ---
 try:
