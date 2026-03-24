@@ -197,8 +197,8 @@ def plot_report_card(
         label_fmt = _fmt
 
     norm_ = plt.Normalize(vmin=vmin, vmax=vmax)
-    cell_colours = plot_values.applymap(lambda x: cmap(norm_(x)))
-    cell_text = plot_values.applymap(label_fmt).values
+    cell_colours = plot_values.map(lambda x: cmap(norm_(x)))
+    cell_text = plot_values.map(label_fmt).values
 
     fig, ax = plt.subplots(figsize=(8.5, 9.6))
     ax.axis("off")
